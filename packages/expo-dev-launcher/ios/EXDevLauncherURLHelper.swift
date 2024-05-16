@@ -17,7 +17,8 @@ public class EXDevLauncherUrl: NSObject {
     self.url = url
 
     if EXDevLauncherURLHelper.isDevLauncherURL(url) {
-      if let urlParam = self.queryParams["url"] {
+      let expoUrl = EXDevLauncherURLHelper.getExpoUrl(url)
+      if let urlParam = expoUrl {
         if let urlFromParam = URL.init(string: urlParam) {
           self.url = EXDevLauncherURLHelper.replaceEXPScheme(urlFromParam, to: "http")
         }
@@ -70,6 +71,15 @@ public class EXDevLauncherURLHelper: NSObject {
       components?.scheme = scheme
     }
     return components?.url ?? url
+  }
+
+  @objc
+  public static func getExpoUrl(_ url: URL) -> String? {
+    let input = url.absoluteString
+    let regex = try! NSRegularExpression(pattern: "\\?url=(.*)")
+    let range = NSRange(location: 0, length: input.utf16.count)
+    guard let match = regex.firstMatch(in: input, options: [], range: range) else { return nil }
+    return (input as NSString).substring(with: match.range(at:1))
   }
 
   @objc
